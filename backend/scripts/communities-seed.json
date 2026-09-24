@@ -1,0 +1,8 @@
+[
+  { "id": "sca", "name": "She Code Africa", "members": "24K", "events": 3, "desc": "The largest community for African women in tech" },
+  { "id": "wtm", "name": "Women Techmakers", "members": "12K", "events": 2, "desc": "Google's program for women in technology" },
+  { "id": "andela", "name": "Andela Community", "members": "8K", "events": 1, "desc": "World-class African tech talent network" },
+  { "id": "gdsc", "name": "GDSC Africa", "members": "30K", "events": 5, "desc": "Google Developer Student Clubs across Africa" },
+  { "id": "wiai", "name": "Women in AI Africa", "members": "8K", "events": 2, "desc": "Advancing AI education for African women" },
+  { "id": "afro", "name": "Afrolynk Community", "members": "4K", "events": 1, "desc": "Pan-African tech startup ecosystem" }
+]

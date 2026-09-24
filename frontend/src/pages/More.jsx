@@ -23,7 +23,8 @@ import {
   Trophy,
 } from 'lucide-react';
 import { useStore } from '../store';
-import { communityService, aiService } from '../services';
+import { communityService, aiService, authService, profileService } from '../services';
+import { USE_MOCK } from '../api/client';
 import { Loading, ErrorBox } from '../components';
 
 const inp =
@@ -31,31 +32,53 @@ const inp =
 
 export function Login() {
   const nav = useNavigate();
-  const { profile, setProfile } = useStore();
+  const { profile, setProfile, setToken } = useStore();
   const [e, setE] = useState('');
   const [p, setP] = useState('');
   const [show, setShow] = useState(false);
   const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
 
   const ok = /^\S+@\S+\.\S+$/.test(e) && p.length >= 8;
 
-  const submit = () => {
+  const submit = async () => {
     if (!ok) {
       return setErr('Enter a valid email and a password of at least 8 characters.');
     }
-    if (!profile) {
-      setProfile({
-        firstName: e.split('@')[0],
-        lastName: '',
-        country: 'Nigeria',
-        city: '',
-        stage: 'Student',
-        level: 'Beginner',
-        interests: [],
-        preferences: [],
-      });
+    setErr('');
+
+    if (USE_MOCK) {
+      if (!profile) {
+        setProfile({
+          firstName: e.split('@')[0],
+          lastName: '',
+          country: 'Nigeria',
+          city: '',
+          stage: 'Student',
+          level: 'Beginner',
+          interests: [],
+          preferences: [],
+        });
+      }
+      return nav('/', { replace: true });
     }
-    nav('/', { replace: true });
+
+    setBusy(true);
+    try {
+      const { token } = await authService.login(e, p);
+      setToken(token);
+      const remoteProfile = await profileService.get();
+      if (remoteProfile) {
+        setProfile(remoteProfile);
+        nav('/', { replace: true });
+      } else {
+        nav('/onboarding', { replace: true });
+      }
+    } catch (err) {
+      setErr(err.message || 'Could not sign in. Please try again.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -127,8 +150,8 @@ export function Login() {
         </p>
       )}
 
-      <button className="btn" onClick={submit}>
-        Sign In
+      <button className="btn" disabled={busy} onClick={submit}>
+        {busy ? 'Signing in…' : 'Sign In'}
       </button>
 
       <Link

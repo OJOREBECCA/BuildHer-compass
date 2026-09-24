@@ -1,0 +1,35 @@
+{
+  "title": "BuildHer Compass Opportunity Intelligence input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "categories": {
+      "title": "Categories to collect",
+      "type": "array",
+      "description": "Which opportunity categories to scrape. Leave empty to collect all supported categories.",
+      "editor": "select",
+      "default": [],
+      "items": {
+        "type": "string",
+        "enum": ["internships", "scholarships", "fellowships", "training-and-conferences", "contests"],
+        "enumTitles": ["Internships", "Scholarships", "Fellowships", "Bootcamps / Trainings", "Hackathons / Contests"]
+      }
+    },
+    "maxItemsPerCategory": {
+      "title": "Max items per category",
+      "type": "integer",
+      "description": "How many opportunities to extract per category per run.",
+      "default": 6,
+      "minimum": 1,
+      "maximum": 50
+    },
+    "requestDelayMs": {
+      "title": "Delay between requests (ms)",
+      "type": "integer",
+      "description": "Politeness delay between HTTP requests to the source site.",
+      "default": 400,
+      "minimum": 100,
+      "maximum": 5000
+    }
+  }
+}

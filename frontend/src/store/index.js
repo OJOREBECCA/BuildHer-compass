@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { USE_MOCK } from '../api/client';
+import { applicationService, profileService } from '../services';
 
 export const CHECKLIST = [
   'Resume ready',
@@ -15,14 +17,23 @@ const mk = (id, status) => ({
   checklist: {},
 });
 
+// Best-effort write-through to the backend. The local store stays the
+// source of truth for rendering, so a failed sync never blocks the UI.
+const sync = (fn) => {
+  if (!USE_MOCK) fn().catch((err) => console.warn('Sync failed:', err.message));
+};
+
 export const useStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
+      token: null,
       profile: null,
       apps: {},
       joined: ['sca'],
       reminders: true,
       remindAt: [3, 1, 0],
+
+      setToken: (token) => set({ token }),
 
       toggleRemindAt: (n) =>
         set((s) => ({
@@ -31,9 +42,13 @@ export const useStore = create(
             : [...s.remindAt, n],
         })),
 
-      setProfile: (profile) => set({ profile }),
+      setProfile: (profile) => {
+        set({ profile });
+        sync(() => profileService.put(profile));
+      },
 
-      toggleSave: (id) =>
+      toggleSave: (id) => {
+        const unsaving = get().apps[id]?.status === 'saved';
         set((s) => {
           const a = { ...s.apps };
           if (a[id]?.status === 'saved') {
@@ -42,9 +57,15 @@ export const useStore = create(
             a[id] = mk(id, 'saved');
           }
           return { apps: a };
-        }),
+        });
+        sync(() =>
+          unsaving ? applicationService.remove(id) : applicationService.put(id, { status: 'saved' })
+        );
+      },
 
-      toggleCheck: (id, k) =>
+      toggleCheck: (id, k) => {
+        const current = get().apps[id] ?? mk(id, 'saved');
+        const next = !current.checklist[k];
         set((s) => {
           const a = s.apps[id] ?? mk(id, 'saved');
           return {
@@ -54,14 +75,16 @@ export const useStore = create(
                 ...a,
                 checklist: {
                   ...a.checklist,
-                  [k]: !a.checklist[k],
+                  [k]: next,
                 },
               },
             },
           };
-        }),
+        });
+        sync(() => applicationService.put(id, { checklist: { [k]: next } }));
+      },
 
-      setStatus: (id, st) =>
+      setStatus: (id, st) => {
         set((s) => ({
           apps: {
             ...s.apps,
@@ -73,7 +96,9 @@ export const useStore = create(
                 : {}),
             },
           },
-        })),
+        }));
+        sync(() => applicationService.put(id, { status: st }));
+      },
 
       toggleJoin: (id) =>
         set((s) => ({
@@ -89,6 +114,7 @@ export const useStore = create(
 
       signOut: () =>
         set({
+          token: null,
           profile: null,
           apps: {},
           joined: [],
