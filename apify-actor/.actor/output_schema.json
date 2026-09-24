@@ -1,0 +1,12 @@
+{
+  "actorOutputSchemaVersion": 1,
+  "title": "BuildHer Compass Opportunity Intelligence output",
+  "properties": {
+    "opportunities": {
+      "type": "string",
+      "title": "Structured opportunities",
+      "description": "Every opportunity extracted this run — title, organization, category, deadline, location, eligibility, and application link. Schema: .actor/dataset_schema.json.",
+      "template": "{{links.apiDefaultDatasetUrl}}/items"
+    }
+  }
+}
