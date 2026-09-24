@@ -117,7 +117,7 @@ export const ErrorBox = () => (
 
 export const Urgency = ({ days }) => (
   <span
-    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+    className={`shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${
       days <= 1
         ? 'bg-red-100 text-red-600'
         : days <= 7

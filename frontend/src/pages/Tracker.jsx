@@ -71,14 +71,14 @@ export function Tracker() {
             const outcome = apps[o.id]?.outcome;
             return (
               <div key={o.id} className="card">
-                <div className="flex justify-between">
-                  <div>
-                    <b>{o.title}</b>
-                    <p className="text-sm text-slate-500">{o.org}</p>
+                <div className="flex min-w-0 items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <b className="block break-words">{o.title}</b>
+                    <p className="truncate text-sm text-slate-500">{o.org}</p>
                   </div>
                   {t === 2 ? (
                     <span
-                      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      className={`shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${
                         outcome === 'won'
                           ? 'bg-emerald-100 text-emerald-600'
                           : outcome === 'lost'
@@ -187,15 +187,15 @@ export function Deadlines() {
                   <Link
                     key={o.id}
                     to={`/opportunity/${o.id}`}
-                    className="card flex items-center justify-between"
+                    className="card flex min-w-0 items-start justify-between gap-3"
                   >
-                    <div>
-                      <b>{o.title}</b>
-                      <p className="text-sm text-slate-500">{o.org}</p>
+                    <div className="min-w-0">
+                      <b className="block break-words">{o.title}</b>
+                      <p className="truncate text-sm text-slate-500">{o.org}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="shrink-0 text-right">
                       <Urgency days={daysLeft(o.deadline)} />
-                      <p className="mt-1 text-xs text-emerald-600">
+                      <p className="mt-1 whitespace-nowrap text-xs text-emerald-600">
                         {o.match}% match
                       </p>
                     </div>
