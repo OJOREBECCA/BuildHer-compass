@@ -1,0 +1,117 @@
+{
+  "actorSpecification": 1,
+  "fields": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "Opportunity",
+    "properties": {
+      "id": {
+        "type": "string",
+        "title": "ID",
+        "description": "Stable slug derived from the source post URL.",
+        "example": "gates-cambridge-scholarship-programme-2027-2028"
+      },
+      "title": {
+        "type": "string",
+        "title": "Title",
+        "description": "Opportunity title as published by the source.",
+        "example": "Gates Cambridge Scholarship Programme 2027/2028"
+      },
+      "org": {
+        "type": "string",
+        "title": "Organization",
+        "description": "Best-effort extracted organization/host name.",
+        "example": "Gates Cambridge"
+      },
+      "category": {
+        "type": "string",
+        "title": "Category",
+        "description": "Normalized category.",
+        "enum": ["Internship", "Scholarship", "Fellowship", "Bootcamp", "Hackathon"]
+      },
+      "deadline": {
+        "type": "string",
+        "title": "Deadline",
+        "description": "Application deadline, ISO 8601 UTC.",
+        "example": "2027-01-05T23:59:00.000Z"
+      },
+      "location": {
+        "type": "string",
+        "title": "Location",
+        "description": "Country/region if detected, else Remote, Global, or Africa-wide.",
+        "example": "Remote"
+      },
+      "summary": {
+        "type": "string",
+        "title": "Summary",
+        "description": "Short (~260 char) excerpt of the opportunity description."
+      },
+      "description": {
+        "type": "string",
+        "title": "Description",
+        "description": "Longer excerpt (~1400 char) of the opportunity description."
+      },
+      "eligibility": {
+        "type": "array",
+        "title": "Eligibility",
+        "description": "Eligibility criteria extracted from the source page.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "label": { "type": "string" },
+            "met": { "type": "boolean" }
+          }
+        }
+      },
+      "benefits": {
+        "type": "array",
+        "title": "Benefits",
+        "description": "Benefits/prizes extracted from the source page, if listed.",
+        "items": { "type": "string" }
+      },
+      "url": {
+        "type": "string",
+        "title": "Application URL",
+        "description": "The real application/apply link, extracted from the post when present; falls back to the source post URL.",
+        "example": "https://www.gatescambridge.org/apply/"
+      },
+      "sourceUrl": {
+        "type": "string",
+        "title": "Source URL",
+        "description": "The source listing's own post URL, for attribution."
+      },
+      "source": {
+        "type": "string",
+        "title": "Source",
+        "description": "Domain of the trusted public source this item was collected from.",
+        "example": "opportunitiesforafricans.com"
+      },
+      "scrapedAt": {
+        "type": "string",
+        "title": "Scraped at",
+        "description": "ISO 8601 UTC timestamp of extraction."
+      }
+    },
+    "required": ["id", "title", "category", "url"]
+  },
+  "views": {
+    "overview": {
+      "title": "Opportunities",
+      "description": "Structured tech opportunities ready for BuildHer Compass.",
+      "transformation": {
+        "fields": ["title", "org", "category", "deadline", "location", "url"]
+      },
+      "display": {
+        "component": "table",
+        "properties": {
+          "title": { "label": "Title" },
+          "org": { "label": "Organization" },
+          "category": { "label": "Category" },
+          "deadline": { "label": "Deadline", "format": "date" },
+          "location": { "label": "Location" },
+          "url": { "label": "Apply", "format": "link" }
+        }
+      }
+    }
+  }
+}
