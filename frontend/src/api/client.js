@@ -6,7 +6,6 @@ export const endpoints = {
   opportunity: (id) => `/opportunities/${id}`,
   applications: '/applications',
   application: (id) => `/applications/${id}`,
-  applicationDraft: (id) => `/applications/${id}/draft`,
   profile: '/profile',
   communities: '/communities',
   aiChat: '/ai/chat',
