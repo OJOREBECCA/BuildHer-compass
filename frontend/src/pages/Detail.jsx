@@ -9,6 +9,8 @@ import {
   CircleCheck,
   Copy,
   RefreshCw,
+  Trophy,
+  PartyPopper,
 } from 'lucide-react';
 import { useOpportunity, daysLeft } from '../hooks';
 import { useStore, CHECKLIST } from '../store';
@@ -70,6 +72,13 @@ export function Detail() {
             <p className="text-sm">
               {o.summary} <b>{o.match}% match.</b> Apply within {daysLeft(o.deadline)} days.
             </p>
+            {o.stats?.submitted > 0 && (
+              <p className="mt-2 flex items-center gap-1 text-xs text-slate-500">
+                <Trophy size={12} className="text-brand" />
+                {o.stats.submitted} Compass {o.stats.submitted === 1 ? 'applicant has' : 'applicants have'} applied
+                {o.stats.trusted && ` · ${Math.round(o.stats.winRate * 100)}% got in`}
+              </p>
+            )}
           </div>
 
           {/* Description */}
@@ -308,9 +317,15 @@ export function Apply() {
   );
 }
 
+const OUTCOMES = [
+  { value: 'won', label: 'I got it! 🎉', on: 'border-emerald-400 bg-emerald-50 text-emerald-700' },
+  { value: 'lost', label: 'Not this time', on: 'border-slate-400 bg-slate-50 text-slate-700' },
+];
+
 export function Submitted() {
   const r = useOpp();
-  const a = useStore((s) => s.apps[r.id]);
+  const { apps, setOutcome } = useStore();
+  const a = apps[r.id];
 
   return (
     <Guard r={r}>
@@ -337,6 +352,36 @@ export function Submitted() {
               <span>Status</span>
               <span className="text-emerald-600">Under Review</span>
             </p>
+          </div>
+
+          {/* Outcome reporting — feeds the community win-rate signal */}
+          <div className="card space-y-3 text-left">
+            <p className="flex items-center gap-2 font-display font-semibold">
+              <PartyPopper size={16} className="text-brand" />
+              Heard back yet?
+            </p>
+            <p className="text-sm text-slate-500">
+              Let other Compass users know how this opportunity went — it helps
+              everyone see which ones are worth the effort.
+            </p>
+            <div className="flex gap-2">
+              {OUTCOMES.map((x) => (
+                <button
+                  key={x.value}
+                  type="button"
+                  aria-pressed={a?.outcome === x.value}
+                  onClick={() => setOutcome(r.id, a?.outcome === x.value ? null : x.value)}
+                  className={`flex-1 rounded-xl border-2 py-3 text-sm font-semibold ${
+                    a?.outcome === x.value ? x.on : 'border-line text-slate-500'
+                  }`}
+                >
+                  {x.label}
+                </button>
+              ))}
+            </div>
+            {!a?.outcome && (
+              <p className="text-center text-xs text-slate-400">Still waiting — no pressure, update this anytime.</p>
+            )}
           </div>
 
           <Link to="/tracker" className="btn block">

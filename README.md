@@ -72,6 +72,14 @@ session via `/auth/signup`.
   template draft if every model is out of quota or overloaded — the feature
   never hard-fails, it just quietly degrades. Add billing to the Gemini key
   for a production-sized quota.
+- **Outcome tracking → smarter match.** On the Submitted screen, users can
+  report what happened ("I got it! 🎉" / "Not this time"). Those outcomes are
+  aggregated *across every account* (`backend/src/outcomes.js`) into a real
+  win rate per opportunity, shown on its detail page ("5 Compass applicants
+  have applied · 75% got in") and folded into that opportunity's match score
+  for everyone (`backend/src/match.js`) — once there's a large enough sample
+  (3+ resolved outcomes) to trust it. The match % is partly earned by the
+  community's actual results, not just a static heuristic.
 - **Scope boundary**: onboarding doesn't collect an email/password, so a
   guest account's data is tied to the device/browser unless the user visits
   `/auth/signup` directly to attach credentials (the backend route exists and

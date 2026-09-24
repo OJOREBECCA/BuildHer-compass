@@ -118,6 +118,19 @@ export const useStore = create(
         sync(() => applicationService.put(id, { draft }));
       },
 
+      // outcome is 'won' | 'lost' | null ("still waiting"). Reported
+      // outcomes feed back into the community win-rate signal other users
+      // see on this opportunity's match score (see backend/src/outcomes.js).
+      setOutcome: (id, outcome) => {
+        set((s) => ({
+          apps: {
+            ...s.apps,
+            [id]: { ...(s.apps[id] ?? mk(id, 'submitted')), outcome },
+          },
+        }));
+        sync(() => applicationService.put(id, { outcome }));
+      },
+
       toggleJoin: (id) =>
         set((s) => ({
           joined: s.joined.includes(id)

@@ -65,27 +65,44 @@ export function Tracker() {
         <Empty text="Nothing here yet. Save an opportunity to start tracking it." />
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">
-          {rows.map((o) => (
-            <div key={o.id} className="card">
-              <div className="flex justify-between">
-                <div>
-                  <b>{o.title}</b>
-                  <p className="text-sm text-slate-500">{o.org}</p>
+          {rows.map((o) => {
+            const outcome = apps[o.id]?.outcome;
+            return (
+              <div key={o.id} className="card">
+                <div className="flex justify-between">
+                  <div>
+                    <b>{o.title}</b>
+                    <p className="text-sm text-slate-500">{o.org}</p>
+                  </div>
+                  {t === 2 ? (
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        outcome === 'won'
+                          ? 'bg-emerald-100 text-emerald-600'
+                          : outcome === 'lost'
+                          ? 'bg-slate-100 text-slate-500'
+                          : 'bg-amber-100 text-amber-700'
+                      }`}
+                    >
+                      {outcome === 'won' ? 'Got it 🎉' : outcome === 'lost' ? 'Not this time' : 'Awaiting reply'}
+                    </span>
+                  ) : (
+                    <Urgency days={daysLeft(o.deadline)} />
+                  )}
                 </div>
-                <Urgency days={daysLeft(o.deadline)} />
+                <Link
+                  to={t === 2 ? `/opportunity/${o.id}/submitted` : `/opportunity/${o.id}/apply`}
+                  className="mt-3 block rounded-xl bg-mist py-3 text-center font-semibold text-brand"
+                >
+                  {t === 0
+                    ? 'Start Application'
+                    : t === 1
+                    ? 'Continue Application'
+                    : 'View Details'}
+                </Link>
               </div>
-              <Link
-                to={`/opportunity/${o.id}/apply`}
-                className="mt-3 block rounded-xl bg-mist py-3 text-center font-semibold text-brand"
-              >
-                {t === 0
-                  ? 'Start Application'
-                  : t === 1
-                  ? 'Continue Application'
-                  : 'View Details'}
-              </Link>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
