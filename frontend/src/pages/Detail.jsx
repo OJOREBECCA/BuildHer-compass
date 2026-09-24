@@ -11,10 +11,12 @@ import {
   RefreshCw,
   Trophy,
   PartyPopper,
+  CalendarPlus,
 } from 'lucide-react';
 import { useOpportunity, daysLeft } from '../hooks';
 import { useStore, CHECKLIST } from '../store';
 import { applicationService } from '../services';
+import { buildDeadlineICS, downloadICS } from '../utils/ics';
 import { Loading, ErrorBox, Empty } from '../components';
 
 function useOpp() {
@@ -37,7 +39,7 @@ const Guard = ({ r, children }) =>
 export function Detail() {
   const r = useOpp();
   const nav = useNavigate();
-  const { apps, toggleSave } = useStore();
+  const { apps, toggleSave, remindAt } = useStore();
 
   return (
     <Guard r={r}>
@@ -134,6 +136,13 @@ export function Detail() {
                 <Bookmark
                   className={apps[o.id] ? 'fill-brand text-brand' : ''}
                 />
+              </button>
+              <button
+                aria-label="Add deadline to calendar"
+                onClick={() => downloadICS(`${o.id}-deadline.ics`, buildDeadlineICS([o], remindAt))}
+                className="rounded-2xl border border-line p-4"
+              >
+                <CalendarPlus />
               </button>
               <Link to={`/opportunity/${o.id}/apply`} className="btn text-center">
                 Apply Now

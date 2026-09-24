@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { CalendarPlus } from 'lucide-react';
 import { useAllOpportunities, daysLeft } from '../hooks';
 import { useStore } from '../store';
+import { buildDeadlineICS, downloadICS } from '../utils/ics';
 import { Loading, Empty, Urgency, ErrorBox } from '../components';
 
 const tabs = [
@@ -110,6 +112,7 @@ export function Tracker() {
 }
 
 export function Deadlines() {
+  const { apps, remindAt } = useStore();
   const { data, loading, error } = useAllOpportunities();
 
   if (loading) return <Loading />;
@@ -118,6 +121,8 @@ export function Deadlines() {
   const d = [...data].sort(
     (a, b) => +new Date(a.deadline) - +new Date(b.deadline)
   );
+
+  const tracked = d.filter((o) => apps[o.id] && apps[o.id].status !== 'submitted');
 
   const g = [
     ['Closing Today', d.filter((o) => daysLeft(o.deadline) <= 1), 'text-red-500'],
@@ -145,9 +150,23 @@ export function Deadlines() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h1 className="font-display text-2xl font-bold">Deadline Compass</h1>
-        <p className="text-slate-500">Stay on top of every closing date</p>
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-bold">Deadline Compass</h1>
+          <p className="text-slate-500">Stay on top of every closing date</p>
+        </div>
+        {tracked.length > 0 && (
+          <button
+            type="button"
+            onClick={() =>
+              downloadICS('buildher-compass-deadlines.ics', buildDeadlineICS(tracked, remindAt))
+            }
+            className="flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-semibold text-brand shadow-card"
+          >
+            <CalendarPlus size={14} />
+            Add {tracked.length} to Calendar
+          </button>
+        )}
       </header>
 
       {/* Summary Rings */}
