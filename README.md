@@ -61,9 +61,17 @@ session via `/auth/signup`.
 
 - **Real**: scraping (`apify-actor`), the backend API and persistence, auth
   (guest + email/password), per-user match scoring, applications/checklist
-  tracking, and the AI chat endpoint (a deterministic heuristic over real
-  data — no LLM key was available for this build; swap `backend/src/routes/ai.js`
-  for a real model call whenever one is).
+  tracking, and an **AI Draft Assistant** on the Apply screen — a real Gemini
+  call (`backend/src/gemini.js`) that writes a tailored first-draft personal
+  statement from the user's profile + the opportunity, which the user can
+  edit and copy. The AI chat endpoint is still a deterministic heuristic over
+  real data, not an LLM call.
+- **Gemini free tier is small** (20 requests/day *per model*). `gemini.js`
+  tries a short list of models (`GEMINI_MODEL`, comma-separated) with retries
+  before giving up, and `POST /applications/:id/draft` falls back to a
+  template draft if every model is out of quota or overloaded — the feature
+  never hard-fails, it just quietly degrades. Add billing to the Gemini key
+  for a production-sized quota.
 - **Scope boundary**: onboarding doesn't collect an email/password, so a
   guest account's data is tied to the device/browser unless the user visits
   `/auth/signup` directly to attach credentials (the backend route exists and

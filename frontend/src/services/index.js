@@ -61,6 +61,13 @@ export const profileService = {
       : http(endpoints.profile, { method: 'PUT', body: JSON.stringify(profile) }),
 };
 
+function mockDraft(profile, opportunity, notes) {
+  const name = profile?.firstName || 'I';
+  const stage = profile?.stage ? profile.stage.toLowerCase() : 'someone building a career in tech';
+  const emphasis = notes ? ` I'd also like to highlight ${notes}.` : '';
+  return `Dear ${opportunity.org} Selection Committee,\n\nMy name is ${name}, and I'm excited to apply for ${opportunity.title}. As ${stage} interested in ${profile?.interests?.[0] || 'technology'}, this opportunity is exactly where I want to grow next.${emphasis}\n\nThank you for considering my application.\n\nSincerely,\n${name}\n\n[Mock draft — connect the real backend for an AI-generated version tailored to this opportunity.]`;
+}
+
 export const applicationService = {
   list: () => (USE_MOCK ? wait({}) : http(endpoints.applications)),
   put: (opportunityId, patch) =>
@@ -69,6 +76,13 @@ export const applicationService = {
       : http(endpoints.application(opportunityId), { method: 'PUT', body: JSON.stringify(patch) }),
   remove: (opportunityId) =>
     USE_MOCK ? wait(null) : http(endpoints.application(opportunityId), { method: 'DELETE' }),
+  draft: (opportunityId, notes, { profile, opportunity } = {}) =>
+    USE_MOCK
+      ? wait({ draft: mockDraft(profile, opportunity, notes), source: 'mock' })
+      : http(endpoints.applicationDraft(opportunityId), {
+          method: 'POST',
+          body: JSON.stringify({ notes }),
+        }),
 };
 
 export const authService = {
