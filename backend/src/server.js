@@ -13,7 +13,25 @@ const { startScheduler, getIntervalMs } = require('./scheduler');
 const { runSync, isSyncInProgress, getLastSyncError } = require('./sync');
 
 const app = express();
-app.use(cors());
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'https://build-her-compass.vercel.app',
+  'http://localhost:5173'
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
 app.get('/health', (_req, res) => {
