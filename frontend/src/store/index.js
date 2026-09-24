@@ -100,6 +100,24 @@ export const useStore = create(
         sync(() => applicationService.put(id, { status: st }));
       },
 
+      // Local-only update, used both for live-typing in the draft textarea
+      // and to store the result of a generation call (already persisted
+      // server-side by that endpoint, so no extra write-through here).
+      setDraftLocal: (id, draft) =>
+        set((s) => ({
+          apps: {
+            ...s.apps,
+            [id]: { ...(s.apps[id] ?? mk(id, 'saved')), draft },
+          },
+        })),
+
+      // Persists the current draft text, e.g. on textarea blur after
+      // hand-editing an AI-generated draft.
+      syncDraft: (id) => {
+        const draft = get().apps[id]?.draft ?? '';
+        sync(() => applicationService.put(id, { draft }));
+      },
+
       toggleJoin: (id) =>
         set((s) => ({
           joined: s.joined.includes(id)
