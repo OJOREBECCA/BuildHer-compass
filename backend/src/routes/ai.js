@@ -2,6 +2,7 @@ const express = require('express');
 const db = require('../db');
 const { optionalAuth } = require('../middleware/auth');
 const { computeMatch } = require('../match');
+const { computeOutcomeStatsMap } = require('../outcomes');
 
 const router = express.Router();
 
@@ -14,7 +15,8 @@ router.post('/chat', optionalAuth, (req, res) => {
   const p = prompt.toLowerCase();
   const profile = req.userId ? db.state.profiles[req.userId] : null;
 
-  const withMatch = db.state.opportunities.map((o) => ({ ...o, match: computeMatch(profile, o) }));
+  const statsMap = computeOutcomeStatsMap();
+  const withMatch = db.state.opportunities.map((o) => ({ ...o, match: computeMatch(profile, o, statsMap[o.id]) }));
   const soon = [...withMatch].sort((a, b) => +new Date(a.deadline) - +new Date(b.deadline));
 
   if (!withMatch.length) {

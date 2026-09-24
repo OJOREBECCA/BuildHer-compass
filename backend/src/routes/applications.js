@@ -18,7 +18,8 @@ router.get('/', requireAuth, (req, res) => {
 router.put('/:opportunityId', requireAuth, (req, res) => {
   const { state, persist } = db;
   const { opportunityId } = req.params;
-  const { status, checklist, draft } = req.body || {};
+  const body = req.body || {};
+  const { status, checklist, draft } = body;
 
   const userApps = (state.applications[req.userId] ??= {});
   const current = userApps[opportunityId] ?? mk('saved');
@@ -28,6 +29,10 @@ router.put('/:opportunityId', requireAuth, (req, res) => {
     ...(status ? { status } : {}),
     ...(checklist ? { checklist: { ...current.checklist, ...checklist } } : {}),
     ...(typeof draft === 'string' ? { draft } : {}),
+    // 'outcome' in body (not just truthy) so a client can explicitly clear
+    // it back to null ("still waiting") without this being mistaken for
+    // "field not provided".
+    ...('outcome' in body ? { outcome: body.outcome } : {}),
   };
   if (status === 'submitted' && !current.submittedOn) {
     next.submittedOn = new Date().toISOString();
