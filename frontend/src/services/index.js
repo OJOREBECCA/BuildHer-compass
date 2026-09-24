@@ -100,3 +100,10 @@ export const authService = {
   login: (email, password) =>
     http(endpoints.authLogin, { method: 'POST', body: JSON.stringify({ email, password }) }),
 };
+
+// No mock fallback: the sync status indicator only makes sense against a
+// real backend, and the Dashboard hides it entirely in mock mode.
+export const syncService = {
+  status: () => http(endpoints.health),
+  trigger: () => http(endpoints.sync, { method: 'POST' }),
+};

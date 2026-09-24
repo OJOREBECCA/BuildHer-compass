@@ -9,17 +9,40 @@ const applicationRoutes = require('./routes/applications');
 const communityRoutes = require('./routes/communities');
 const aiRoutes = require('./routes/ai');
 const db = require('./db');
+const { startScheduler, getIntervalMs } = require('./scheduler');
+const { runSync, isSyncInProgress, getLastSyncError } = require('./sync');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 app.get('/health', (_req, res) => {
+  const syncedAt = db.state.opportunitiesSyncedAt;
   res.json({
     ok: true,
     opportunities: db.state.opportunities.length,
-    opportunitiesSyncedAt: db.state.opportunitiesSyncedAt,
+    opportunitiesSyncedAt: syncedAt,
+    nextSyncAt: syncedAt ? new Date(new Date(syncedAt).getTime() + getIntervalMs()).toISOString() : null,
+    syncInProgress: isSyncInProgress(),
+    lastSyncError: getLastSyncError(),
   });
+});
+
+// Manual "sync now" trigger for the dashboard's refresh button. Fires the
+// sync in the background and returns immediately — poll /health for
+// opportunitiesSyncedAt to see when it's done. A short cooldown keeps this
+// public, unauthenticated endpoint from being hammered.
+let lastManualTriggerAt = 0;
+app.post('/sync', (_req, res) => {
+  if (isSyncInProgress()) return res.status(202).json({ ok: true, status: 'already running' });
+
+  if (Date.now() - lastManualTriggerAt < 30_000) {
+    return res.status(429).json({ error: 'Sync was just triggered — try again in a moment.' });
+  }
+  lastManualTriggerAt = Date.now();
+
+  runSync().catch((err) => console.warn('Manual sync failed:', err.message));
+  res.status(202).json({ ok: true, status: 'started' });
 });
 
 app.use('/auth', authRoutes);
@@ -37,4 +60,5 @@ app.use((err, _req, res, _next) => {
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`BuildHer Compass API listening on http://localhost:${PORT}`);
+  startScheduler();
 });

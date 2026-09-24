@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -11,7 +12,9 @@ import {
   Loader2,
   Inbox,
   AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
+import { syncService } from '../services';
 
 const nav = [
   { to: '/', label: 'Home', I: Home },
@@ -125,3 +128,71 @@ export const Urgency = ({ days }) => (
     {days <= 1 ? 'Today' : `${days}d left`}
   </span>
 );
+
+function relativeTime(iso) {
+  if (!iso) return 'never';
+  const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  return `${hours}h ago`;
+}
+
+// Shows when the live opportunity feed last refreshed (the backend syncs on
+// its own schedule — see backend/src/scheduler.js — and the deployed Apify
+// Actor is also on its own platform-side Scheduler). Polls periodically so
+// it reflects a scheduler-driven refresh without the user doing anything,
+// and offers a manual "sync now" for demos.
+export function SyncStatus() {
+  const [health, setHealth] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let live = true;
+    const poll = () =>
+      syncService
+        .status()
+        .then((h) => live && setHealth(h))
+        .catch(() => {});
+    poll();
+    const id = setInterval(poll, 20000);
+    return () => {
+      live = false;
+      clearInterval(id);
+    };
+  }, []);
+
+  const refresh = async () => {
+    setBusy(true);
+    try {
+      await syncService.trigger();
+    } catch {
+      // ignore — the poll below will just keep showing the last known state
+    }
+    const start = Date.now();
+    const id = setInterval(async () => {
+      const h = await syncService.status().catch(() => null);
+      if (h) setHealth(h);
+      if ((h && !h.syncInProgress) || Date.now() - start > 60000) {
+        clearInterval(id);
+        setBusy(false);
+      }
+    }, 3000);
+  };
+
+  if (!health) return null;
+  const syncing = busy || health.syncInProgress;
+
+  return (
+    <button
+      type="button"
+      onClick={refresh}
+      disabled={syncing}
+      title="Opportunities refresh automatically — click to sync now"
+      className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-slate-500 shadow-card disabled:opacity-70"
+    >
+      <RefreshCw size={12} className={syncing ? 'animate-spin' : ''} />
+      {syncing ? 'Syncing…' : `${health.opportunities} opportunities · synced ${relativeTime(health.opportunitiesSyncedAt)}`}
+    </button>
+  );
+}
