@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, Award, CircleCheck, Lock } from 'lucide-react';
+import { ArrowLeft, Mail, Award, CircleCheck, Lock, CalendarPlus } from 'lucide-react';
 import { useStore, CHECKLIST } from '../store';
 import { useAllOpportunities, daysLeft } from '../hooks';
+import { buildDeadlineICS, downloadICS } from '../utils/ics';
 import { Loading, ErrorBox, Empty } from '../components';
 
 const Back = () => {
@@ -139,9 +140,21 @@ export function Reminders() {
         ))}
       </div>
 
-      <h2 className="font-display font-semibold">
-        Scheduled for your tracked opportunities
-      </h2>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="font-display font-semibold">
+          Scheduled for your tracked opportunities
+        </h2>
+        {tracked.length > 0 && (
+          <button
+            type="button"
+            onClick={() => downloadICS('buildher-compass-deadlines.ics', buildDeadlineICS(tracked, remindAt))}
+            className="flex shrink-0 items-center gap-1.5 rounded-full bg-mist px-3 py-1.5 text-xs font-semibold text-brand"
+          >
+            <CalendarPlus size={14} />
+            Add to Calendar
+          </button>
+        )}
+      </div>
 
       {!tracked.length ? (
         <Empty text="Save an opportunity and its reminders will show up here." />

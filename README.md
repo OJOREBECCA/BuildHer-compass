@@ -80,6 +80,12 @@ session via `/auth/signup`.
   for everyone (`backend/src/match.js`) — once there's a large enough sample
   (3+ resolved outcomes) to trust it. The match % is partly earned by the
   community's actual results, not just a static heuristic.
+- **Calendar export (.ics)**, entirely client-side (`frontend/src/utils/ics.js`,
+  no backend involved). Single-opportunity export from the Detail page, and
+  bulk export of every tracked deadline from the Deadline Compass and
+  Reminder Settings pages — each generated `.ics` includes `VALARM` entries
+  matching the user's own reminder settings (3 days / 1 day / on the day),
+  so a real calendar app nudges them the same way Compass would.
 - **Scope boundary**: onboarding doesn't collect an email/password, so a
   guest account's data is tied to the device/browser unless the user visits
   `/auth/signup` directly to attach credentials (the backend route exists and
