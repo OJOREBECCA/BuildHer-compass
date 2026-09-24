@@ -89,3 +89,14 @@ pricing in Console — not exposed over the API).
 `backend/scripts/sync-opportunities.js` runs the scraper locally by default
 (free, fast); set `APIFY_ACTOR_ID=v3mqraM83U2weoyzM` + `APIFY_TOKEN` in
 `backend/.env` to pull from real platform runs instead.
+
+**On a real schedule, not a one-off script.** The Actor also runs on an
+[Apify Scheduler](https://console.apify.com/schedules) entry (every 6 hours,
+`0 */6 * * *`), independent of anything in this repo — it keeps producing
+fresh dataset runs on the platform whether or not the backend is running.
+The backend has its own, separate refresh cycle (`backend/src/scheduler.js`,
+`SYNC_INTERVAL_MINUTES`, default 60) that re-ingests opportunities on a
+timer; `GET /health` reports `opportunitiesSyncedAt` / `nextSyncAt` /
+`syncInProgress`, and `POST /sync` triggers one early (rate-limited to avoid
+abuse). The Dashboard header shows this live as a "N opportunities · synced
+Xm ago" pill with a click-to-refresh action.

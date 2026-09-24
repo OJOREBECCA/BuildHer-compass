@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Bell, Search, Bookmark, Sparkles, Clock } from 'lucide-react';
 import { useOpportunities, daysLeft, useAllOpportunities } from '../hooks';
 import { useStore } from '../store';
-import { Loading, Empty, ErrorBox } from '../components';
+import { USE_MOCK } from '../api/client';
+import { Loading, Empty, ErrorBox, SyncStatus } from '../components';
 
 const cats = ['All', 'Fellowship', 'Scholarship', 'Hackathon', 'Internship', 'Bootcamp'];
 
@@ -48,6 +49,12 @@ export function Dashboard({ explore }) {
           </Link>
         </div>
       </header>
+
+      {!USE_MOCK && (
+        <div>
+          <SyncStatus />
+        </div>
+      )}
 
       {/* Banner (Dashboard only) */}
       {!explore && (

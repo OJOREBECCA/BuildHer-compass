@@ -13,6 +13,8 @@ export const endpoints = {
   authGuest: '/auth/guest',
   authSignup: '/auth/signup',
   authLogin: '/auth/login',
+  health: '/health',
+  sync: '/sync',
 };
 
 function getToken() {
