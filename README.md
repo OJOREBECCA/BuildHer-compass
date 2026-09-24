@@ -97,9 +97,14 @@ session via `/auth/signup`.
 **Live and deployed:** [console.apify.com/actors/v3mqraM83U2weoyzM](https://console.apify.com/actors/v3mqraM83U2weoyzM) —
 pushed with `apify push`, builds successfully, and a verified platform run
 produced real structured opportunities. See
-[`apify-actor/README.md`](apify-actor/README.md) for how the scraper works,
-its input schema, and the one remaining manual step (turning on Pay-Per-Event
-pricing in Console — not exposed over the API).
+[`apify-actor/README.md`](apify-actor/README.md) for the problem it solves,
+its input/output schemas, and how to run it — it's the full write-up this
+one-line summary can't replace. **One manual step remains**, and it can't be
+scripted (Apify doesn't expose a publish/monetize API): in Console, either
+turn on Pay-Per-Event pricing for `opportunity-extracted` (the code already
+charges it) or publish the Actor as open-source on the Store — either
+satisfies "public or monetized." Both are ~2-minute Console actions, detailed
+in the Actor's own README.
 `backend/scripts/sync-opportunities.js` runs the scraper locally by default
 (free, fast); set `APIFY_ACTOR_ID=v3mqraM83U2weoyzM` + `APIFY_TOKEN` in
 `backend/.env` to pull from real platform runs instead.
