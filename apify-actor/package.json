@@ -1,0 +1,19 @@
+{
+  "name": "buildher-compass-opportunity-intelligence",
+  "version": "0.1.0",
+  "description": "Apify Actor that scrapes and structures tech opportunities (internships, fellowships, scholarships, bootcamps, hackathons) relevant to African women in tech for BuildHer Compass.",
+  "main": "src/main.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/main.js",
+    "scrape:local": "node scripts/run-local.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "apify": "^3.7.2",
+    "cheerio": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

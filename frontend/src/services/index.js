@@ -22,13 +22,13 @@ export const opportunityService = {
 };
 
 export const communityService = {
-  list: () => (USE_MOCK ? wait(communities) : http('/communities')),
+  list: () => (USE_MOCK ? wait(communities) : http(endpoints.communities)),
 };
 
 export const aiService = {
   reply: async (prompt) => {
     if (!USE_MOCK) {
-      const res = await http('/ai/chat', {
+      const res = await http(endpoints.aiChat, {
         method: 'POST',
         body: JSON.stringify({ prompt }),
       });
@@ -49,4 +49,40 @@ export const aiService = {
     const top = soon.slice(0, 2);
     return `Focus on ${top.map((o) => o.title).join(' and ')}: they close first. Start with the checklist so you're ready to submit.`;
   },
+};
+
+// No-ops in mock mode: local zustand state (persisted to localStorage) is
+// the only store, so there's nothing on a server to read or write.
+export const profileService = {
+  get: () => (USE_MOCK ? wait(null) : http(endpoints.profile)),
+  put: (profile) =>
+    USE_MOCK
+      ? wait(profile)
+      : http(endpoints.profile, { method: 'PUT', body: JSON.stringify(profile) }),
+};
+
+export const applicationService = {
+  list: () => (USE_MOCK ? wait({}) : http(endpoints.applications)),
+  put: (opportunityId, patch) =>
+    USE_MOCK
+      ? wait(patch)
+      : http(endpoints.application(opportunityId), { method: 'PUT', body: JSON.stringify(patch) }),
+  remove: (opportunityId) =>
+    USE_MOCK ? wait(null) : http(endpoints.application(opportunityId), { method: 'DELETE' }),
+};
+
+export const authService = {
+  // Ensures the app is holding a usable session token before it needs to
+  // persist anything server-side. Anonymous/guest by default so onboarding
+  // doesn't require collecting an email/password up front. http() already
+  // attaches any token already in localStorage, so calling this again with
+  // an existing valid token just returns that same account.
+  ensureSession: () =>
+    USE_MOCK ? wait({ token: null, user: null }) : http(endpoints.authGuest, { method: 'POST' }),
+
+  signup: (email, password) =>
+    http(endpoints.authSignup, { method: 'POST', body: JSON.stringify({ email, password }) }),
+
+  login: (email, password) =>
+    http(endpoints.authLogin, { method: 'POST', body: JSON.stringify({ email, password }) }),
 };

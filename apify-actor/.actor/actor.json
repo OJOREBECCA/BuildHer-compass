@@ -1,0 +1,12 @@
+{
+  "actorSpecification": 1,
+  "name": "buildher-compass-opportunity-intelligence",
+  "title": "BuildHer Compass Opportunity Intelligence",
+  "description": "Collects internships, fellowships, scholarships, bootcamps and hackathons relevant to African women in tech from trusted public sources, and structures them (title, organization, category, deadline, location, eligibility, application link) for BuildHer Compass.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "minMemoryMbytes": 256,
+  "maxMemoryMbytes": 1024,
+  "input": "./input_schema.json",
+  "dockerfile": "../Dockerfile"
+}

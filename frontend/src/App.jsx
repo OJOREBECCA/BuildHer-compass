@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Shell } from './components';
 import { useStore } from './store';
+import { authService } from './services';
+import { USE_MOCK } from './api/client';
 
 import { Welcome, Onboarding } from './pages/Onboarding';
 import { Dashboard } from './pages/Dashboard';
@@ -11,6 +14,18 @@ import { Login, Ready, Communities, Profile, Chat } from './pages/More';
 
 export default function App() {
   const done = !!useStore((s) => s.profile);
+  const token = useStore((s) => s.token);
+  const setToken = useStore((s) => s.setToken);
+
+  // Makes sure every device has a persisted (initially anonymous) backend
+  // session before onboarding/applications try to write to it.
+  useEffect(() => {
+    if (USE_MOCK || token) return;
+    authService
+      .ensureSession()
+      .then((r) => setToken(r.token))
+      .catch((err) => console.warn('Could not start a session:', err.message));
+  }, [token]);
 
   return (
     <Routes>
