@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -7,12 +6,9 @@ import {
   X,
   Sparkles,
   CircleCheck,
-  Copy,
-  RefreshCw,
 } from 'lucide-react';
 import { useOpportunity, daysLeft } from '../hooks';
 import { useStore, CHECKLIST } from '../store';
-import { applicationService } from '../services';
 import { Loading, ErrorBox, Empty } from '../components';
 
 function useOpp() {
@@ -140,34 +136,9 @@ export function Detail() {
 export function Apply() {
   const r = useOpp();
   const nav = useNavigate();
-  const { apps, toggleCheck, setStatus, profile, setDraftLocal, syncDraft } = useStore();
+  const { apps, toggleCheck, setStatus } = useStore();
   const a = apps[r.id];
   const ready = CHECKLIST.filter((c) => a?.checklist[c]).length;
-
-  const [notes, setNotes] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [draftErr, setDraftErr] = useState('');
-
-  const generate = async (opportunity) => {
-    setBusy(true);
-    setDraftErr('');
-    try {
-      const res = await applicationService.draft(r.id, notes, { profile, opportunity });
-      setDraftLocal(r.id, res.draft);
-    } catch (err) {
-      setDraftErr(err.message || 'Could not generate a draft. Try again.');
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const copy = async () => {
-    if (!a?.draft) return;
-    await navigator.clipboard.writeText(a.draft);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
 
   return (
     <Guard r={r}>
@@ -204,75 +175,6 @@ export function Apply() {
                 {c}
               </label>
             ))}
-          </div>
-
-          {/* AI Draft Assistant */}
-          <div className="card space-y-3">
-            <p className="flex items-center gap-2 font-display font-semibold text-brand">
-              <Sparkles size={16} />
-              AI Draft Assistant
-            </p>
-            <p className="text-sm text-slate-500">
-              Get a first-draft personal statement tailored to your profile and this
-              opportunity — edit it, then paste it into the real application.
-            </p>
-
-            <input
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Anything you want it to emphasize? (optional)"
-              className="w-full rounded-xl border border-line bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-brand"
-            />
-
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => generate(o)}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 font-semibold text-white disabled:opacity-60"
-            >
-              {busy ? (
-                <>
-                  <RefreshCw size={16} className="animate-spin" />
-                  Writing your draft…
-                </>
-              ) : a?.draft ? (
-                <>
-                  <RefreshCw size={16} />
-                  Regenerate draft
-                </>
-              ) : (
-                <>
-                  <Sparkles size={16} />
-                  Generate draft
-                </>
-              )}
-            </button>
-
-            {draftErr && (
-              <p role="alert" className="text-sm text-red-600">
-                {draftErr}
-              </p>
-            )}
-
-            {a?.draft && (
-              <>
-                <textarea
-                  value={a.draft}
-                  onChange={(e) => setDraftLocal(r.id, e.target.value)}
-                  onBlur={() => syncDraft(r.id)}
-                  rows={10}
-                  className="w-full rounded-xl border border-line bg-mist p-3 text-sm leading-relaxed outline-none focus:ring-2 focus:ring-brand"
-                />
-                <button
-                  type="button"
-                  onClick={copy}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-line bg-white py-3 font-semibold text-brand"
-                >
-                  <Copy size={16} />
-                  {copied ? 'Copied!' : 'Copy draft'}
-                </button>
-              </>
-            )}
           </div>
 
           <button
